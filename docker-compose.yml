@@ -1,0 +1,23 @@
+services:
+  Invetario:  # Nombre del servicio
+    container_name: Invetario  # Nombre del contenedor
+    image: python:3.13-slim  # Imagen base
+    build:
+      context: .  # Contexto para la construcción
+      dockerfile: Dockerfile  # Asegúrate de que el Dockerfile esté en la raíz del contexto
+    environment:
+      - PYTHONPATH=/CODE  
+    networks:
+      - Proyectos  # Conéctate a la red 'Proyectos'
+    ports:
+      - "8002:8002"  # Mapea el puerto 8001 del contenedor al puerto 8001 de la máquina host
+    volumes:
+      - .:/CODE  # Monta el directorio actual en el contenedor para desarrollo
+      - Inevtario:/CODE  # Usa el volumen existente llamado LOGIN
+
+networks:
+  Proyectos:  # Define la red 'Proyectos'
+    external: true  # Asegúrate de que use la red externa existente
+
+volumes:
+  Inventario:  # Define el volumen llamado LOGIN
