@@ -1,27 +1,32 @@
-# Usa una imagen base de Python
+# Usa una imagen base estable de Python
 FROM python:3.13-slim
 
 # Establece el directorio de trabajo
 WORKDIR /CODE
 
-# Añade esta línea para establecer el PYTHONPATH
+# Establece el PYTHONPATH
 ENV PYTHONPATH=/CODE
 
-# Instala dependencias del sistema
-RUN apt-get update && apt-get install -y git
+# Instala dependencias necesarias para la compilación
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    build-essential \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copia el archivo requirements.txt
+# Instala Rust para compilar extensiones necesarias
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:$PATH"
+
+# Copia y instala las dependencias
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Instala las dependencias desde requirements.txt
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+WORKDIR /CODE
 
-# Copia el resto del código del backend
+# Copia el resto del código
 COPY . .
 
-# Exponer el puerto que usará la aplicación
-EXPOSE 8002
-
 # Comando para ejecutar la aplicación
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8003", "--reload"]
